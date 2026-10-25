@@ -29,9 +29,11 @@ jobs:
           sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
           yq --version
-
       - name: Update deployment image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          SHORT_SHA=${GITHUB_SHA::6}
-          yq -i '.spec.template.spec.containers[0].image = "kamran0786/gha-pyapp:"'"$SHORT_SHA"'"' pyapp-deployment.yml
+          SHORT_SHA="${IMAGE_TAG:0:6}"
+          yq -i '.spec.template.spec.containers[0].image = "kamran0786/gha-pyapp:" + strenv(SHORT_SHA)' pyapp-deployment.yml
           cat pyapp-deployment.yml
+
