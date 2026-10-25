@@ -48,7 +48,7 @@ jobs:
 
       - name: Update deployment.yml with latest Docker tag
 
-            - name: Push Docker Image to Docker Hub
+      - name: Push Docker Image to Docker Hub
         run: docker push kamran0786/gha-pyapp:${GITHUB_SHA::6}
 
       - name: Install yq
