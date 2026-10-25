@@ -35,4 +35,5 @@ jobs:
         run: |
           SHORT_SHA=${GITHUB_SHA::6}
           yq -i '.spec.template.spec.containers[0].image = "kamran0786/gha-pyapp:"'"$SHORT_SHA"'"' pyapp-deployment.yml
-          cat
+          cat pyapp-deployment.yml
+```
