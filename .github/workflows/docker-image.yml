@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   pyapp-ci:
     runs-on: ubuntu-latest
@@ -29,17 +32,25 @@ jobs:
           sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
           yq --version
+
       - name: Update deployment image
         env:
           IMAGE_TAG: ${{ github.sha }}
+          DOCKER_IMAGE: kamran0786/gha-pyapp
         run: |
           SHORT_SHA="${IMAGE_TAG:0:6}"
-          yq -i '.spec.template.spec.containers[0].image = "kamran0786/gha-pyapp:" + "$(SHORT_SHA)' pyapp-deployment.yml
+          export SHORT_SHA
+          yq -i '.spec.template.spec.containers[0].image = strenv(DOCKER_IMAGE) + ":" + strenv(SHORT_SHA)' pyapp-deployment.yml
           cat pyapp-deployment.yml
+
       - name: Commit deployment file changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add pyapp-deployment.yml
-          git diff --cached --quiet || git commit -m "Update Docker image tag"
-          git push origin main
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Docker image tag"
+            git push origin HEAD:main
+          else
+            echo "No deployment file changes to commit"
+          fi
