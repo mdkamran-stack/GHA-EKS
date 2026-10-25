@@ -47,6 +47,20 @@ jobs:
           yq --version
 
       - name: Update deployment.yml with latest Docker tag
+
+            - name: Push Docker Image to Docker Hub
+        run: docker push kamran0786/gha-pyapp:${GITHUB_SHA::6}
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update deployment YAML with latest Docker tag
+        run: |
+          SHORT_SHA=${GITHUB_SHA::6}
+          yq -i '.spec.template.spec.containers[0].image = "kamran0786/gha-pyapp:"'"$SHORT_SHA"'"' pyapp-deployment.yml
+          cat pyapp-deployment.yml
         run: |
           SHORT_SHA=${GITHUB_SHA::6}
           yq -i '.spec.template.spec.containers[0].image = "kamran0786/gha-pyapp:'"$SHORT_SHA"'"' pyapp-deployment.yml
